@@ -6,46 +6,11 @@
 $stream = getcwd() . "\milano.csv";
 
 
-function csvToJson($fname)
-{
-    // open csv file
-    if (!($fp = fopen($fname, 'r'))) {
-        die("Can't open file...");
-    }
-
-    //read csv headers
-    $key = fgetcsv($fp, "1024", ",");
-
-    // parse csv rows into array
-    $json = array();
-    while ($row = fgetcsv($fp, "1024", ",")) {
-        $json[] = array_combine($key, $row);
-    }
-
-    // release file handle
-    fclose($fp);
-
-    // encode array to json
-    return json_encode($json);
-}
-
 
 
 /**
- * which function to be called position or bank
+ * only function that will be executed
  */
-
-//$post = 9183468117;
-if (isset($_POST["func"])) {
-    $func = $_POST["func"];
-    $id = $_POST["id"];
-} else {
-    $func = "";
-    $id = 0;
-}
-
-//$response = json_decode($post, TRUE);
-
 print_r(decider($func, $id));
 
 function decider($func, $id)
@@ -102,6 +67,52 @@ function decider($func, $id)
 }
 
 
+
+function csvToJson($fname)
+{
+    // open csv file
+    if (!($fp = fopen($fname, 'r'))) {
+        die("Can't open file...");
+    }
+
+    //read csv headers
+    $key = fgetcsv($fp, "1024", ",");
+
+    // parse csv rows into array
+    $json = array();
+    while ($row = fgetcsv($fp, "1024", ",")) {
+        $json[] = array_combine($key, $row);
+    }
+
+    // release file handle
+    fclose($fp);
+
+    // encode array to json
+    return json_encode($json);
+}
+
+
+
+/**
+ * which function to be called position or bank
+ */
+
+//$post = 9183468117;
+if (isset($_POST["func"])) {
+    $func = $_POST["func"];
+    $id = $_POST["id"];
+} else {
+    $func = "";
+    $id = 0;
+}
+
+//$response = json_decode($post, TRUE);
+
+
+
+/**
+ * return the nearest 3 banks
+ */
 function bank($id, $returner, $res)
 {
 
@@ -141,6 +152,10 @@ function bank($id, $returner, $res)
 
         $distances = array();
 
+        /**
+         * for each records calculate the distance with pythagorean algorithm
+         */
+
         foreach ($items as $key => $location) {
             $a = $base_location['lat'] - $location['Lat'];
             $b = $base_location['lng'] - $location['Long'];
@@ -176,7 +191,10 @@ function bank($id, $returner, $res)
             //echo "<br> $i. closest  bank is: " . $closest["name"] . " to  " . $res["name"];
             //echo "<br> .$i. closest is: " .print_r($closest);
             //echo "<br>" . $res["id"];
-
+            
+            /**
+             * closest ones are unsetted from array to prevent duplication
+             */
             unset($distances[$will_unset]);
         }
     }
