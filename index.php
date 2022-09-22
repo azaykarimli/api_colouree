@@ -64,16 +64,15 @@ $call_az_Api = call_az_Api($func, $actual_link, $id_topass);
 $response = json_decode($call_az_Api, TRUE);
 //$call_az_Api = json_encode($call_az_Api, JSON_PRETTY_PRINT);
 
-if(empty($response)){
+if (empty($response)) {
 
-    echo "id or func params must be incorrect: FUNC can be 'position' and 'bank' //// id can be not exist on file <BR>"; 
+    echo "id or func params must be incorrect: FUNC can be 'position' and 'bank' //// id can be not exist on file <BR>";
     echo "<a type='button' href='$actual_link_all'>Click me see all records</a>";
-
-
+} else {
+    echo "<PRE>";
+    print_r($response);
+    echo "</PRE>";
 }
-echo "<PRE>";
-print_r($response);
-echo "</PRE>";
 
 
 function call_az_Api($func, $actual_link, $id_topass)
