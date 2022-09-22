@@ -1,8 +1,8 @@
 <?php
 $default_id = 715948248;
-$actual_link_all = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]" . "/api_cvs";
-$actual_link_position = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]" . "/api_cvs/?func=position&id=$default_id";
-$actual_link_bank = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]" . "/api_cvs/?func=bank&id=$default_id";
+$actual_link_all = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]" . "/api_colouree";
+$actual_link_position = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]" . "/api_colouree/?func=position&id=$default_id";
+$actual_link_bank = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]" . "/api_colouree/?func=bank&id=$default_id";
 ?>
 
 <!DOCTYPE html>
@@ -36,7 +36,7 @@ $actual_link_bank = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "h
 //$actual_link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]" . "proxy.php";
 
 //link to the proxy.php file 
-$actual_link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]" . "/api_cvs/proxy.php";
+$actual_link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]" . "/api_colouree/proxy.php";
 
 
 $func = "";
@@ -92,7 +92,7 @@ function call_az_Api($func, $actual_link, $id_topass)
     $curl = curl_init();
     curl_setopt($curl, CURLOPT_POST, 1);
     curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
-    //curl_setopt($curl, CURLOPT_URL, 'http://localhost/api_cvs/proxy.php');
+    //curl_setopt($curl, CURLOPT_URL, 'http://localhost/api_colouree/proxy.php');
     curl_setopt($curl, CURLOPT_URL, $actual_link);
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 
@@ -125,7 +125,7 @@ function call_az_Api($func)
     $curl = curl_init();
     curl_setopt($curl, CURLOPT_POST, 1);
     curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
-    //curl_setopt($curl, CURLOPT_URL, 'http://localhost/api_cvs/proxy.php');
+    //curl_setopt($curl, CURLOPT_URL, 'http://localhost/api_colouree/proxy.php');
     curl_setopt($curl, CURLOPT_URL, $actual_link);
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 
