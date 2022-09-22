@@ -1,151 +1,139 @@
 <?php
-// php function to convert csv to json format
-function csvToJson($fname)
-{
-    // open csv file
-    if (!($fp = fopen($fname, 'r'))) {
-        die("Can't open file...");
-    }
+$default_id = 715948248;
+$actual_link_all = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]" . "/api_cvs";
+$actual_link_position = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]" . "/api_cvs/?func=position&id=$default_id";
+$actual_link_bank = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]" . "/api_cvs/?func=bank&id=$default_id";
+?>
 
-    //read csv headers
-    $key = fgetcsv($fp, "1024", ",");
+<!DOCTYPE html>
+<html lang="en">
 
-    // parse csv rows into array
-    $json = array();
-    while ($row = fgetcsv($fp, "1024", ",")) {
-        $json[] = array_combine($key, $row);
-    }
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
 
-    // release file handle
-    fclose($fp);
+<body>
+    <div>
+        <a href="<?php echo $actual_link_all; ?>"> show all records </a>
+    </div>
+    <div>
+        <a href="<?php echo $actual_link_position; ?>"> position (this link has default random id. You can change it manually in the browser) </a>
+    </div>
+    <div>
+        <a href="<?php echo $actual_link_bank; ?>"> 3 closest Banks (this link has default random id. You can change it manually in the browser) </a>
+    </div>
 
-    // encode array to json
-    return json_encode($json);
+</body>
+
+</html>
+
+
+<?php
+
+//$actual_link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]" . "proxy.php";
+$actual_link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]" . "/api_cvs/proxy.php";
+
+
+$func = "";
+//$func = $_POST["func"];
+if (isset($_GET["func"])) {
+
+    $func = $_GET["func"];
+}
+if (isset($_GET["id"])) {
+
+    $id_topass = $_GET["id"];
+} else {
+    $id_topass = $default_id;
 }
 
-//$post = 9183468117;
-$func = $_POST["func"];
-$id = $_POST["id"];
-//$response = json_decode($post, TRUE);
+//$func = "bank";
+//$func = "position";
+//$func = "";
 
-decider($func, $id);
 
-function decider($func, $id)
-{
 
-    switch ($func) {
 
-        case "position":
+/**
+ * default will return ll the rrecords
+ */
+$call_az_Api = call_az_Api($func, $actual_link, $id_topass);
+$response = json_decode($call_az_Api, TRUE);
+//$call_az_Api = json_encode($call_az_Api, JSON_PRETTY_PRINT);
 
-            $res = position($id);
+if(empty($response)){
 
-            break;
-        case "bank":
-            $res = position($id);
+    echo "id or func params must be incorrect: FUNC can be 'position' and 'bank' //// id can be not exist on file <BR>"; 
+    echo "<a type='button' href='$actual_link_all'>Click me see all records</a>";
 
-            $stream = "C:\\folder\\milano.csv";
 
-            $returner = csvToJson("$stream");
-
-            $res = bank($id, $returner, $res);
-
-            break;
-    }
-    return $res;
 }
-
-
-function bank($id, $returner, $res)
-{
-
-    $ref = array($res["Lat"], $res["Long"]);
-
-    $response = json_decode($returner, TRUE);
-
-    $items = $response;
-
-
-    for ($i = 0; $i <= 2; $i++) {
-
-        //$ref = array(49.648881, -103.575312);
-        
-
-        $distances = array_map(function ($item) use ($ref) {
-            $a = array_slice($item, -2);
-            return distance($a, $ref);
-        }, $items);
-
-        asort($distances);
-
-        echo '<br>Closest item is: ', print_r($items[key($distances)]["id"]);
-
-        $will_unset = $items[key($distances)]["id"];
-
-        unset($items[array_search($will_unset, $items)]);
-
-    }
-
-
-    //echo 'Closest item is: ', var_dump($items[key($distances)]);
-    //echo 'Closest item is: ', print_r($items[key($distances)]["id"]);
-}
-
-
-function distance($a, $b)
-{
-    $miles = 0;
-    if (isset($lat1) && isset($lat2)) {
-        list($lat1, $lon1) = $a;
-        list($lat2, $lon2) = $b;
-        $theta = $lon1 - $lon2;
-        $dist = sin(deg2rad($lat1)) * sin(deg2rad($lat2)) +  cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * cos(deg2rad($theta));
-        $dist = acos($dist);
-        $dist = rad2deg($dist);
-        $miles = $dist * 60 * 1.1515;
-    }
-
-
-
-    return $miles;
-}
-
-
-function position($id)
-{
-
-
-    $stream = "C:\\folder\\milano.csv";
-
-    $returner = csvToJson("$stream");
-
-    $response = json_decode($returner, TRUE);
-
-    foreach ($response as $res => $value) {
-
-        /*    foreach($value as $v){
-
-        echo "<PRE>";
-        print_r($v);
-        echo "</PRE>";
-
-    } */
-        if ($value["id"] == $id) {
-
-            /* echo "<PRE>";
-            print_r($value);
-            echo "</PRE>"; */
-            return $value;
-        }
-        //print_r($value["id"]);
-
-
-        /*     echo "<PRE>";
-    print_r($value["id"]);
-    echo "</PRE>"; */
-    }
-
-    /* echo "<PRE>";
+echo "<PRE>";
 print_r($response);
 echo "</PRE>";
- */
+
+
+function call_az_Api($func, $actual_link, $id_topass)
+{
+    $data = array(
+        //"func" => "position",
+        "func" => $func,
+        "id" => $id_topass
+    );
+
+    /**
+     * link of file in browser
+     */
+
+    $curl = curl_init();
+    curl_setopt($curl, CURLOPT_POST, 1);
+    curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+    //curl_setopt($curl, CURLOPT_URL, 'http://localhost/api_cvs/proxy.php');
+    curl_setopt($curl, CURLOPT_URL, $actual_link);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+
+    $jsonData = json_decode(curl_exec($curl), true);
+
+    //curl_close($curl);
+
+    $result = curl_exec($curl);
+
+    return $result;
 }
+
+
+
+
+/* 
+function call_az_Api($func)
+{
+    $data = array(
+        //"func" => "position",
+        "func" => $func,
+        "id" => 715948248
+    );
+
+    
+     //link of file in browser
+     
+    $actual_link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]"."proxy.php";
+
+    $curl = curl_init();
+    curl_setopt($curl, CURLOPT_POST, 1);
+    curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+    //curl_setopt($curl, CURLOPT_URL, 'http://localhost/api_cvs/proxy.php');
+    curl_setopt($curl, CURLOPT_URL, $actual_link);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+
+    $jsonData = json_decode(curl_exec($curl), true);
+
+    //curl_close($curl);
+
+    $result = curl_exec($curl);
+
+    return $result;
+}
+ */

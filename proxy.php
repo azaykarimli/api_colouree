@@ -1,34 +1,240 @@
 <?php
+// php function to convert csv to json format
 
-//$func = $_POST["func"];
-$func = "bank";
+//getcwd();
 
-
-$call_az_Api = call_az_Api($func);
-echo "<PRE>";
-print_r($call_az_Api);
-echo "</PRE>";
+$stream = getcwd() . "\milano.csv";
 
 
-function call_az_Api($func)
+function csvToJson($fname)
 {
-    $data = array(
-        //"func" => "position",
-        "func" => $func,
-        "id" => 9183468117
-    );
+    // open csv file
+    if (!($fp = fopen($fname, 'r'))) {
+        die("Can't open file...");
+    }
 
-    $curl = curl_init();
-    curl_setopt($curl, CURLOPT_POST, 1);
-    curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
-    curl_setopt($curl, CURLOPT_URL, 'http://localhost/api_cvs/');
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    //read csv headers
+    $key = fgetcsv($fp, "1024", ",");
 
-    $jsonData = json_decode(curl_exec($curl), true);
+    // parse csv rows into array
+    $json = array();
+    while ($row = fgetcsv($fp, "1024", ",")) {
+        $json[] = array_combine($key, $row);
+    }
 
-    //curl_close($curl);
+    // release file handle
+    fclose($fp);
 
-    $result = curl_exec($curl);
+    // encode array to json
+    return json_encode($json);
+}
 
-    return $result;
+
+
+/**
+ * which function to be called position or bank
+ */
+
+//$post = 9183468117;
+if (isset($_POST["func"])) {
+    $func = $_POST["func"];
+    $id = $_POST["id"];
+} else {
+    $func = "";
+    $id = 0;
+}
+
+//$response = json_decode($post, TRUE);
+
+print_r(decider($func, $id));
+
+function decider($func, $id)
+{
+
+    switch ($func) {
+
+        case "position":
+
+            $res = position($id);
+
+            //echo "<PRE>";
+            $res = position($id);
+            //echo "</PRE>";
+
+
+            break;
+        case "bank":
+            $res = position($id);
+
+            $res = json_decode($res, TRUE);
+
+            //$stream = "C:\\folder\\milano.csv";
+            $stream = getcwd() . "\milano.csv";
+
+            $returner = csvToJson("$stream");
+
+            //$returner = json_decode($returner, TRUE);
+
+
+            $res = json_encode(bank($id, $returner, $res));
+
+            break;
+
+        default:
+
+            $stream = getcwd() . "\milano.csv";
+
+            $returner = csvToJson("$stream");
+            //$response = json_decode($returner, TRUE);
+
+
+            //echo "<PRE>";
+            //$res = print_r($response);
+            $res = $returner;
+            //$res = print_r($returner);
+            //echo "</PRE>";
+
+
+
+            break;
+    }
+    return $res;
+}
+
+
+function bank($id, $returner, $res)
+{
+
+    //$ref = array($res["Lat"], $res["Long"]);
+
+    $response = json_decode($returner, TRUE);
+
+    $items = array();
+
+    foreach ($response as $re) {
+
+        if ($re["secondary"] == "bank") {
+
+            $items[] = $re;
+        }
+    }
+
+    /**
+     * unset the itself from list
+     */
+    unset($items[array_search($res, $items)]);
+
+    $closeest_banks = "";
+
+    /**
+     * base location that we are searching closest bank
+     */
+    if (!empty($res)) {
+
+
+        $base_location = array(
+            'lat' => $res["Lat"],
+            'lng' => $res["Long"]
+        );
+
+
+
+        $distances = array();
+
+        foreach ($items as $key => $location) {
+            $a = $base_location['lat'] - $location['Lat'];
+            $b = $base_location['lng'] - $location['Long'];
+            $distance = sqrt(($a ** 2) + ($b ** 2));
+            $distances[$key] = $distance;
+        }
+
+
+
+        $closeest_banks = array();
+
+        for ($i = 1; $i <= 3; $i++) {
+
+            asort($distances);
+
+            $closest = $items[key($distances)];
+
+            $will_unset = key($distances);
+
+            $distance_mile = $distances[key($distances)] * 60 * 1.1515;
+
+            $distance_km = (round($distance_mile * 1.609344, 2));
+
+            //echo "<br> Closest foreach suburb is: " . $closest['id'];
+
+            //$closeest_banks[] = $distance_km;
+            $closeest_banks[] =
+                [
+                    "info" =>  $closest,
+                    "km" =>  $distance_km
+                ];
+
+            //echo "<br> $i. closest  bank is: " . $closest["name"] . " to  " . $res["name"];
+            //echo "<br> .$i. closest is: " .print_r($closest);
+            //echo "<br>" . $res["id"];
+
+            unset($distances[$will_unset]);
+        }
+    }
+
+
+
+    return $closeest_banks;
+}
+
+
+
+/**
+ * position function will return the informations based on id provided
+ */
+
+
+function position($id)
+{
+
+
+    //$stream = "C:\\folder\\milano.csv";
+    $stream = getcwd() . "\milano.csv";
+
+    $returner = csvToJson("$stream");
+
+    $response = json_decode($returner, TRUE);
+
+    $resultant = array();
+
+    foreach ($response as $res => $value) {
+
+        /*    foreach($value as $v){
+
+        echo "<PRE>";
+        print_r($v);
+        echo "</PRE>";
+
+    } */
+        if ($value["id"] == $id) {
+
+            //print_r($value);
+            /*     echo "<PRE>";
+            print_r($value);
+            echo "</PRE>"; */
+            $resultant = $value;
+            //return $value;
+        }
+        //print_r($value["id"]);
+
+
+        /*     echo "<PRE>";
+    print_r($value["id"]);
+    echo "</PRE>"; */
+    }
+
+    /* echo "<PRE>";
+print_r($response);
+echo "</PRE>";
+ */
+    return json_encode($resultant);
 }
