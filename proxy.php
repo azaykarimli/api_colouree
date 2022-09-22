@@ -7,6 +7,18 @@ $stream = getcwd() . "\milano.csv";
 
 
 
+/**
+ * which function to be called position or bank
+ */
+
+//$post = 9183468117;
+if (isset($_POST["func"])) {
+    $func = $_POST["func"];
+    $id = $_POST["id"];
+} else {
+    $func = "";
+    $id = 0;
+}
 
 /**
  * only function that will be executed
@@ -93,18 +105,6 @@ function csvToJson($fname)
 
 
 
-/**
- * which function to be called position or bank
- */
-
-//$post = 9183468117;
-if (isset($_POST["func"])) {
-    $func = $_POST["func"];
-    $id = $_POST["id"];
-} else {
-    $func = "";
-    $id = 0;
-}
 
 //$response = json_decode($post, TRUE);
 
@@ -191,7 +191,7 @@ function bank($id, $returner, $res)
             //echo "<br> $i. closest  bank is: " . $closest["name"] . " to  " . $res["name"];
             //echo "<br> .$i. closest is: " .print_r($closest);
             //echo "<br>" . $res["id"];
-            
+
             /**
              * closest ones are unsetted from array to prevent duplication
              */
