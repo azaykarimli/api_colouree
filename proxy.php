@@ -41,9 +41,9 @@ function decider($func, $id)
 
             break;
         case "bank":
-            $res = position($id);
+            $resulntanto = position($id);
 
-            $res = json_decode($res, TRUE);
+            $resulntanto = json_decode($resulntanto, TRUE);
 
             //$stream = "C:\\folder\\milano.csv";
             $stream = getcwd() . "\milano.csv";
@@ -52,8 +52,8 @@ function decider($func, $id)
 
             //$returner = json_decode($returner, TRUE);
 
-
-            $res = json_encode(bank($id, $returner, $res));
+            $res[] = ["searched_id_position" => $resulntanto];
+            $res = json_encode(bank($id, $returner, $resulntanto));
 
             break;
 
@@ -135,7 +135,7 @@ function bank($id, $returner, $res)
      */
     unset($items[array_search($res, $items)]);
 
-    $closeest_banks = "";
+    $closeest_banks = ["searched_id_position" => $res];
 
     /**
      * base location that we are searching closest bank
@@ -165,7 +165,7 @@ function bank($id, $returner, $res)
 
 
 
-        $closeest_banks = array();
+        //$closeest_banks = array();
 
         for ($i = 1; $i <= 3; $i++) {
 
@@ -182,7 +182,7 @@ function bank($id, $returner, $res)
             //echo "<br> Closest foreach suburb is: " . $closest['id'];
 
             //$closeest_banks[] = $distance_km;
-            $closeest_banks[] =
+            $closeest_banks["closest_bank_$i"] =
                 [
                     "info" =>  $closest,
                     "km" =>  $distance_km
